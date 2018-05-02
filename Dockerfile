@@ -110,9 +110,35 @@ RUN make
 
 RUN cp mb /usr/local/bin
 
+#Install picard
+
+WORKDIR $BIN
+RUN wget https://github.com/broadinstitute/picard/releases/download/2.18.4/picard.jar
+ENV PICARD="$BIN/picard.jar"
+
+#GATK
+RUN wget https://github.com/broadinstitute/gatk/releases/download/4.0.4.0/gatk-4.0.4.0.zip
+RUN  unzip gatk-4.0.4.0.zip 
+ENV PATH="/usr/local/bin/gatk-4.0.4.0/:${PATH}"
 
 
-#set shell
+#VARSCAN
+ENV OPT /opt
+WORKDIR $OPT
+
+RUN apt-get install -y cmake
+RUN wget http://downloads.sourceforge.net/project/varscan/VarScan.v2.3.9.jar && mv VarScan.v2.3.9.jar VarScan.jar
+RUN wget https://github.com/genome/bam-readcount/archive/v0.7.4.tar.gz && tar xvzf v0.7.4.tar.gz && rm v0.7.4.tar.gz
+RUN  cd /opt/bam-readcount-0.7.4 && mkdir build && cd build && cmake ../ && make deps && make -j && make install
+ENV VarScan="$OPT/VarScan.jar"
+
+#Install BWA
+
+RUN wget https://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.17.tar.bz2
+RUN  tar xvjf bwa-0.7.17.tar.bz2
+RUN cd bwa-0.7.17 && make
+ENV PATH="$OPT/bwa-0.7.17/:${PATH}"
+    
 	
 
 CMD /bin/bash -l
