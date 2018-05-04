@@ -139,7 +139,18 @@ RUN  tar xvjf bwa-0.7.17.tar.bz2
 RUN cd bwa-0.7.17 && make
 ENV PATH="$OPT/bwa-0.7.17/:${PATH}"
     
-	
+#Install bowtie2
+
+ENV ZIP=bowtie2-2.2.9-linux-x86_64.zip
+ENV URL=https://github.com/BenLangmead/bowtie2/releases/download/v2.2.9/
+ENV FOLDER=bowtie2-2.2.9
+
+
+RUN wget $URL/$ZIP -O $BIN/$ZIP && \
+    unzip $BIN/$ZIP -d $BIN && \
+    rm $BIN/$ZIP && \
+    mv $BIN/$FOLDER/* $BIN && \
+rmdir $BIN/$FOLDER	
 
 CMD /bin/bash -l
 
