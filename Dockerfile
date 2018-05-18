@@ -57,7 +57,6 @@ ENV PATH=${TRINITY_HOME}:${PATH}
 
 COPY Dockerfile $SRC/Dockerfile.$TRINITY_VERSION
 
-
 RUN apt-get install -y libtbb-dev && apt-get clean
 
 RUN cd /usr/local/src &&\ 
@@ -117,10 +116,10 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/2.18.4/picar
 ENV PICARD="$BIN/picard.jar"
 
 #GATK
-RUN wget https://github.com/broadinstitute/gatk/releases/download/4.0.4.0/gatk-4.0.4.0.zip
-RUN  unzip gatk-4.0.4.0.zip 
-ENV PATH="/usr/local/bin/gatk-4.0.4.0/:${PATH}"
-
+RUN wget www.hep.uniovi.es/lara/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 
+RUN tar -xjvf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
+RUN mv /usr/local/bin/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar /usr/local/bin/gatk.jar
+RUN chmod a+x /usr/local/bin/gatk.jar
 
 #VARSCAN
 ENV OPT /opt
