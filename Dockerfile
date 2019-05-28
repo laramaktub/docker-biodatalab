@@ -37,32 +37,27 @@ RUN wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.5.0/ncbi-blast-2.
 ## Trinity
 
 
+WORKDIR $SRC
 
-# Version Trinity 2.4.0
-ENV TRINITY_VERSION="2.4.0"
+RUN apt-get update && apt-get install -y cmake
 
+RUN apt-get install -y rsync
 
-RUN TRINITY_URL="https://github.com/trinityrnaseq/trinityrnaseq/archive/Trinity-v${TRINITY_VERSION}.tar.gz" && \
-    wget $TRINITY_URL
+ENV TRINITY_VERSION="2.8.5"
+ENV TRINITY_CO="d35f3c1149bab077ca7c83f209627784469c41c6"
 
-RUN tar -xvf Trinity-v${TRINITY_VERSION}.tar.gz
+WORKDIR $SRC
 
-RUN cd trinityrnaseq-Trinity-v${TRINITY_VERSION} && make
+RUN git clone https://github.com/trinityrnaseq/trinityrnaseq.git && \
+    cd trinityrnaseq && \
+    git checkout $TRINITY_CO && \
+    make && make plugins && \
+    make install && \
+    cd ../ && rm -r trinityrnaseq
 
-ENV TRINITY_HOME $SRC/trinityrnaseq-Trinity-v${TRINITY_VERSION}
-
-RUN cp $TRINITY_HOME/trinity-plugins/BIN/samtools $BIN
+ENV TRINITY_HOME /usr/local/bin/trinityrnaseq
 
 ENV PATH=${TRINITY_HOME}:${PATH}
-
-COPY Dockerfile $SRC/Dockerfile.$TRINITY_VERSION
-
-RUN apt-get install -y libtbb-dev && apt-get clean
-
-RUN cd /usr/local/src &&\ 
-    rm -rf *tar.gz
-
-
 
 
 ## Install prinseq
@@ -96,18 +91,8 @@ ENV PATH="/usr/local/src/iqtree-1.6.2-Linux/bin:${PATH}"
 
 #mrbayer
 
-RUN apt install -y vim mpich wget autoconf gcc make
+RUN  apt-get install -y mrbayes
 
-RUN wget 'http://downloads.sourceforge.net/project/mrbayes/mrbayes/3.2.6/mrbayes-3.2.6.tar.gz'
-RUN tar -xvzf mrbayes-3.2.6.tar.gz
-
-WORKDIR /usr/local/src/mrbayes-3.2.6/src
-
-RUN autoconf
-RUN ./configure --enable-mpi=yes --with-beagle=no
-RUN make
-
-RUN cp mb /usr/local/bin
 
 #Install picard
 
@@ -116,7 +101,7 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/2.18.4/picar
 ENV PICARD="$BIN/picard.jar"
 
 #GATK
-RUN wget www.hep.uniovi.es/lara/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 
+RUN wget https://cephrgw01.ifca.es:8080/swift/v1/datalabbio/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 
 RUN tar -xjvf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
 RUN mv /usr/local/bin/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar /usr/local/bin/gatk.jar
 RUN chmod a+x /usr/local/bin/gatk.jar
@@ -151,5 +136,10 @@ RUN wget $URL/$ZIP -O $BIN/$ZIP && \
     mv $BIN/$FOLDER/* $BIN && \
 rmdir $BIN/$FOLDER	
 
-CMD /bin/bash -l
+## Samtools
+RUN wget https://github.com/samtools/samtools/releases/download/1.7/samtools-1.7.tar.bz2 && \
+    tar xvf samtools-1.7.tar.bz2 && \
+    cd samtools-1.7/ && \
+    ./configure && make && make install
+
 
